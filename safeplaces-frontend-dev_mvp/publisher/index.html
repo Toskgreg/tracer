@@ -1,0 +1,221 @@
+<!--  HTML code specific to publisher -->
+
+<html lang="en">
+    <head>
+        <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+        <meta charset="utf-8" />
+        <meta name="author" content="Kevin P. , MITsdm'18" />
+        <title>Safe Places: Publishing Tool</title>
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css"
+        />
+        <link
+            rel="stylesheet"
+            href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css"
+        />
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.28/moment-timezone-with-data.min.js"></script>
+
+        <link rel="stylesheet" href="../css/style.css" />
+        <link rel="stylesheet" href="../css/publisher.css" />
+    </head>
+
+    <body>
+        <div id="get-map-api-panel" class="modal">
+            <!-- Modal content -->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1>Safe Places</h1>
+                </div>
+
+                <p id="loginQuestion">Enter a Google Maps Javascript API key.</p>
+                <p>
+                    Either
+                    <a href="https://developers.google.com/maps/documentation/javascript/get-api-key"
+                        >get your own key</a
+                    >
+                    or request one from an administrator.
+                </p>
+
+                <form>
+                    <label for="api-key">Map API Key:</label>
+                    <input
+                        type="text"
+                        name="api-key"
+                        id="api-key"
+                        placeholder="map_api_key"
+                        class="text ui-widget-content ui-corner-all"
+                    />
+                    <p></p>
+
+                    <input class="button" type="button" id="submit" value="Submit" onclick="enterAPIKey();" />
+                    &nbsp;
+                </form>
+            </div>
+        </div>
+
+        <div id="login-panel" class="modal">
+            <!-- Modal content -->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1>Safe Places</h1>
+                </div>
+
+                <p id="loginQuestion">Enter your credentials.</p>
+                <p id="validateTips">&nbsp;</p>
+
+                <form>
+                    <label for="Username">Username:</label>
+                    <input
+                        type="text"
+                        name="username"
+                        id="username"
+                        placeholder="name"
+                        class="text ui-widget-content ui-corner-all"
+                    />
+                    <p></p>
+                    <label for="password">Password:</label>
+                    <input
+                        type="password"
+                        name="password"
+                        id="password"
+                        placeholder="password"
+                        class="text ui-widget-content ui-corner-all"
+                    />
+
+                    <!-- Allow form submission with keyboard without duplicating the dialog button -->
+                    <p></p>
+
+                    <img id="logo" onclick="onLogoClick()" src="" />
+                    <img id="logo_name" onclick="onLogoClick()" src="" />
+                    <input class="button" type="button" id="login" value="Login" onclick="doLogin()" />
+                </form>
+            </div>
+        </div>
+
+        <div id="saving-panel" class="modal">
+            <!-- Modal content -->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Saving</h2>
+                </div>
+
+                <p id="progress" class="progress">Connecting...</p>
+            </div>
+        </div>
+
+        <button class="btn" onclick="doLogout()" id="logout">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+
+        <div id="floating-panel">
+            <h2>Safe Places - Publishing Tool</h2>
+
+            <input
+                id="privatekitJSON"
+                style="display: none;"
+                type="file"
+                multiple="multiple"
+                accept=".json"
+                onchange="loadPath()"
+            />
+            <button class="button" onclick="$('#privatekitJSON').click();" id="loadFromFile">
+                <i class="fa fa-folder-open"></i> Load
+            </button>
+
+            <button class="button" onclick="loadPath()" id="loadFromServer">
+                <img id="btn_logo" src="" /> Load
+            </button>
+
+            <button class="button btn_view" onclick="zoomToExtent()" id="zoomToExtent">
+                <i class="fas fa-expand-arrows-alt"></i> Zoom
+            </button>
+
+            <div style="display: none;" id="stats">
+                Visible: <span id="visible">0</span> Hidden: <span id="hidden">0</span> Deleted:
+                <span id="deleted">0</span> Total: <span id="total">0</span>
+            </div>
+
+            <div>
+                <hr class="fade-edge-hr" />
+
+                <div style="padding: 8px; text-align: left;">
+                    Date Range:
+                    <span id="duration-container">
+                        <span id="duration"></span
+                        ><input onclick="updateLockIcon()" type="checkbox" id="lock-window" />
+                        <label for="lock-window"><i id="lock-icon" class="fas fa-lock"></i></label>
+                    </span>
+                    <br />
+                    <div id="dates">
+                        <div id="date-start">&nbsp;</div>
+                        <span id="date-sep">&nbsp;</span>
+                        <div id="date-end">&nbsp;</div>
+                    </div>
+                    <div id="slider-range"></div>
+                </div>
+
+                <hr class="fade-edge-hr" />
+                <div style="padding: 8px; text-align: left;">
+                    Organization Name:
+                    <div>
+                        <input id="org_name" placeholder="Enter the organization name" class="" type="text" />
+                        <span class="example"> Ex: US Department of Health</span>
+                    </div>
+                    Information URL:
+                    <div>
+                        <input
+                            id="org_url"
+                            placeholder="Enter a URL for news and updates"
+                            class=""
+                            type="text"
+                        />
+                        <span class="example"> Ex: https://my.org/path/to/news.html</span>
+                    </div>
+                    safe_path URL:
+                    <div>
+                        <input
+                            id="safe_path_json"
+                            placeholder="Enter notification URL for safe_paths"
+                            class=""
+                            type="text"
+                        />
+                        <span class="example">
+                            Ex: https://www.something.give/safe_path/&#60;organization_id&#62;</span
+                        >
+                    </div>
+                </div>
+
+                <hr class="fade-edge-hr" />
+
+                <div style="align-self: start; width: 100%;">
+                    <button class="button" onclick="showBounds()" id="get_bounds">
+                        <i class="fa fa-clipboard"></i> Bounds
+                    </button>
+                    <input id="bounds" type="text" />
+                    <br />
+                </div>
+
+                <hr class="fade-edge-hr" />
+
+                <input
+                    id="save"
+                    class="button disabled"
+                    disabled="disabled"
+                    onclick="saveText();"
+                    type="button"
+                    value="Publish"
+                />
+            </div>
+        </div>
+        <div id="map"></div>
+        <img id="map_logo" onclick="onLogoClick()" src="" />
+        <img id="map_logo_name" onclick="onLogoClick()" src="" />
+    </body>
+    <script src="../js/config.js"></script>
+    <script src="../js_es5/lib.js"></script>
+    <script src="../js_es5/publisher.js"></script>
+</html>
